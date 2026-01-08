@@ -1,0 +1,30 @@
+name: Generate .NET Core Server Stub from OpenAPI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-server-stub:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. OpenAPI Generator で C# サーバスタブ生成
+      - name: Generate ASP.NET Core server stub
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/local" \
+            openapitools/openapi-generator-cli:latest generate \
+            -i /local/open-api.json \
+            -g aspnetcore \
+            -o /local/generated
+
+      # 3. 生成成果物をアーティファクトとしてアップロード
+      - name: Upload generated C# source code
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-core-server-stub
+          path: generated/
